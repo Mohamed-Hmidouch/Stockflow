@@ -8,6 +8,11 @@ import com.example.stockgestion.models.Inventory;
 import com.example.stockgestion.models.Product;
 import com.example.stockgestion.models.WareHouse;
 import com.example.stockgestion.repositories.InventoryRepository;
+import com.example.stockgestion.repositories.InventoryMovmentRepository;
+import com.example.stockgestion.Dto.request.InventoryMovementRequestDto;
+import com.example.stockgestion.Dto.response.InventoryMovementResponseDto;
+import com.example.stockgestion.models.InventoryMovement;
+import com.example.stockgestion.exception.BusinessRuleException;
 import com.example.stockgestion.repositories.ProductRepository;
 import com.example.stockgestion.repositories.WareHouseRepository;
 import lombok.AllArgsConstructor;
@@ -23,6 +28,7 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
     private final WareHouseRepository wareHouseRepository;
+    private final InventoryMovmentRepository inventoryMovmentRepository;
 
     @Transactional
     public InventoryResponseDto createInventory(InventoryRequestDto dto) {
@@ -63,6 +69,68 @@ public class InventoryService {
     public List<InventoryResponseDto> getAllInventories() {
         List<Inventory> list = inventoryRepository.findAll();
         return list.stream().map(InventoryResponseDto::new).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<InventoryResponseDto> getByProductId(UUID productId) {
+        List<Inventory> list = inventoryRepository.findByProduct_Id(productId);
+        return list.stream().map(InventoryResponseDto::new).toList();
+    }
+
+    @Transactional
+    public InventoryMovementResponseDto createMovement(InventoryMovementRequestDto dto) {
+        // validate product and warehouse
+        Product product = productRepository.findById(dto.getProductId()).orElseThrow(() ->
+                new ResourceNotFoundException("Product", "id", dto.getProductId())
+        );
+        WareHouse warehouse = wareHouseRepository.findById(dto.getWarehouseId()).orElseThrow(() ->
+                new ResourceNotFoundException("WareHouse", "id", dto.getWarehouseId())
+        );
+
+        // find or initialize inventory
+        Inventory inventory = inventoryRepository.findByProduct_IdAndWarehouse_Id(dto.getProductId(), dto.getWarehouseId())
+                .orElseGet(() -> {
+                    Inventory i = new Inventory();
+                    i.setProduct(product);
+                    i.setWarehouse(warehouse);
+                    i.setQtyOnHand(0);
+                    i.setQtyReserved(0);
+                    return i;
+                });
+
+        long qty = dto.getQuantity();
+        switch (dto.getType()) {
+            case INBOUND:
+                inventory.setQtyOnHand(inventory.getQtyOnHand() + qty);
+                break;
+            case OUTBOUND:
+                if (inventory.getQtyOnHand() < qty) {
+                    throw new BusinessRuleException("Stock insuffisant pour sortie: demandé=" + qty + ", disponible=" + inventory.getQtyOnHand());
+                }
+                inventory.setQtyOnHand(inventory.getQtyOnHand() - qty);
+                break;
+            case ADJUSTMENT:
+                long newQty = inventory.getQtyOnHand() + qty;
+                if (newQty < 0) {
+                    throw new BusinessRuleException("L'ajustement mène à un stock négatif: " + newQty);
+                }
+                inventory.setQtyOnHand(newQty);
+                break;
+        }
+
+        Inventory savedInventory = inventoryRepository.save(inventory);
+
+        InventoryMovement movement = new InventoryMovement();
+        movement.setProduct(product);
+        movement.setWarehouse(warehouse);
+        movement.setType(dto.getType());
+        movement.setQuantity(dto.getQuantity());
+        movement.setOccurredAt(dto.getOccurredAt() != null ? dto.getOccurredAt() : java.time.Instant.now());
+        movement.setReferenceDoc(dto.getReferenceDoc());
+
+        InventoryMovement savedMovement = inventoryMovmentRepository.save(movement);
+
+        return new InventoryMovementResponseDto(savedMovement);
     }
 
     @Transactional
