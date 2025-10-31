@@ -14,4 +14,4 @@ git add . et git commit -m "" et git push -u origin <name_of_your_userStorie_bra
 ///Ba3dein, na3mel merge lel main branch f github 3ashan ne5od a5er updates:
 
 git checkout main
-git pull origin main hhh
+git pull origin main 
