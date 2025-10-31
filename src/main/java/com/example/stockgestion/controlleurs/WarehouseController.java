@@ -39,7 +39,6 @@ public class WarehouseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdWarehouse);
     }
 
-    //getmapping  avec id avec envoyer le code de que le obj json recherche avec sont id et bien returner ! comme status code
     @GetMapping("/{id}")
     public ResponseEntity<WareHouseResponseDto> getWarehouseById(@PathVariable UUID id) {
         WareHouseResponseDto warehouse = warehouseService.getWarehouseById(id);
