@@ -10,6 +10,6 @@ import java.util.UUID;
 public interface InventoryRepository extends JpaRepository<Inventory, UUID> {
 	boolean existsByProduct_IdAndWarehouse_Id(UUID productId, UUID warehouseId);
 	List<Inventory> findByProduct_Id(UUID productId);
-	Optional<Inventory> findByProduct_IdAndWarehouse_Id(UUID productId, UUID warehouseId);
+	List<Inventory> findByProduct_IdAndWarehouse_Id(UUID productId, UUID warehouseId);
 	List<Inventory> findByWarehouse_Id(UUID warehouseId);
 }
