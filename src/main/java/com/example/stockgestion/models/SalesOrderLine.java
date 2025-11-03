@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class SalesOrderLine {
 
     @Id
@@ -45,6 +47,14 @@ public class SalesOrderLine {
     @Positive
     @Column(nullable = false)
     private long quantity;
+
+    @Builder.Default
+    @Column(name = "qty_reserved", nullable = false)
+    private long qtyReserved = 0;
+
+    @Builder.Default
+    @Column(name = "qty_backordered", nullable = false)
+    private long qtyBackordered = 0;
 
     // (Présent sur votre diagramme UML)
     @NotNull

@@ -17,6 +17,8 @@ public class SalesOrderLineResponseDto {
     private ProductResponseDto product;
     private WareHouseResponseDto warehouse;
     private long quantity;
+    private long qtyReserved;
+    private long qtyBackordered;
     private BigDecimal unitPrice;
 
     public SalesOrderLineResponseDto(SalesOrderLine line) {
@@ -24,6 +26,8 @@ public class SalesOrderLineResponseDto {
         this.product = new ProductResponseDto(line.getProduct());
         this.warehouse = new WareHouseResponseDto(line.getWarehouse());
         this.quantity = line.getQuantity();
+        this.qtyReserved = line.getQtyReserved();
+        this.qtyBackordered = line.getQtyBackordered();
         this.unitPrice = line.getUnitPrice();
     }
 }

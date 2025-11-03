@@ -1,5 +1,6 @@
 package com.example.stockgestion.Dto.response;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,6 +18,7 @@ public class ProductResponseDto {
     private String name;
     private String category;
     private Boolean active;
+    private BigDecimal price;
 
     public ProductResponseDto(Product product) {
         this.id = product.getId();
@@ -24,5 +26,6 @@ public class ProductResponseDto {
         this.name = product.getName();
         this.category = product.getCategory();
         this.active = product.getActive();
+        this.price = product.getPrice();
     }
 }

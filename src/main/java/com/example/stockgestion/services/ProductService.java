@@ -28,6 +28,7 @@ public class ProductService {
         product.setSku(productRequestDto.getSku());
         product.setCategory(productRequestDto.getCategory());
         product.setActive(productRequestDto.isActive());
+        product.setPrice(productRequestDto.getPrice());
         Product savedProduct = productRepository.save(product);
         return new ProductResponseDto(savedProduct);
     }
@@ -57,6 +58,7 @@ public class ProductService {
                 if (product.getName() != null) existingProduct.setName(product.getName());
                 if (product.getCategory() != null) existingProduct.setCategory(product.getCategory());
                 if(product.getActive() != null) existingProduct.setActive(product.getActive());
+                if(product.getPrice() != null) existingProduct.setPrice(product.getPrice());
                 Product savedProduct = productRepository.save(existingProduct);
                 return new com.example.stockgestion.Dto.response.ProductResponseDto(savedProduct);
             }
