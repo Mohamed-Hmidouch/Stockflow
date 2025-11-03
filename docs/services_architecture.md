@@ -62,20 +62,6 @@ long getAvailableStock(UUID productId, UUID warehouseId);
 @Transactional(readOnly = true)
 boolean isStockAvailable(UUID productId, UUID warehouseId, long quantity);
 
-// Transfert entre entrepôts
-@Transactional
-void transferStock(TransferRequestDto dto);
-
-// Pagination des mouvements avec filtres
-@Transactional(readOnly = true)
-Page<InventoryMovementResponseDto> getMovements(
-    UUID productId, 
-    UUID warehouseId, 
-    MovementType type, 
-    Instant from, 
-    Instant to, 
-    Pageable pageable
-);
 
 // US4 - Récupérer tous les inventaires d'un produit triés par disponibilité (DESC)
 @Transactional(readOnly = true)
