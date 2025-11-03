@@ -1,5 +1,6 @@
 package com.example.stockgestion.Dto.response;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.List;
 import com.example.stockgestion.models.enums.SOStatus;
@@ -19,6 +20,7 @@ public class SalesOrderResponseDto {
     private ClientResponseDto client; // ✅ Remplace clientId
     private SOStatus status;
     private Instant createdAt;
+    private BigDecimal totalPrice;
     private List<SalesOrderLineResponseDto> lines; // ✅ Ajouté
     private List<ShipmentResponseDto> shipments; // ✅ Ajouté (optionnel selon vos besoins)
 
@@ -27,6 +29,7 @@ public class SalesOrderResponseDto {
         this.client = new ClientResponseDto(order.getClient());
         this.status = order.getStatus();
         this.createdAt = order.getCreatedAt();
+        this.totalPrice = order.getTotalPrice();
         this.lines = order.getLines().stream().map(SalesOrderLineResponseDto::new).toList();
         this.shipments = order.getShipments().stream().map(ShipmentResponseDto::new).toList();
     }

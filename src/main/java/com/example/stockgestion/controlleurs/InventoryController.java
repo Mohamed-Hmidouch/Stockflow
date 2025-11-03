@@ -40,23 +40,6 @@ public class InventoryController {
         return ResponseEntity.status(201).body(dto);
     }
 
-    @PostMapping("/reservations")
-    public ResponseEntity<Void> reserve(@Valid @RequestBody com.example.stockgestion.Dto.request.ReservationRequestDto request) {
-        inventoryService.reserve(request);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/reservations/release")
-    public ResponseEntity<Void> releaseReservation(@Valid @RequestBody com.example.stockgestion.Dto.request.ReservationRequestDto request) {
-        inventoryService.releaseReservation(request);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/transfer")
-    public ResponseEntity<Void> transfer(@Valid @RequestBody com.example.stockgestion.Dto.request.TransferRequestDto request) {
-        inventoryService.transfer(request);
-        return ResponseEntity.status(201).build();
-    }
 
     @PostMapping("/outbound")
     public ResponseEntity<Void> outbound(@Valid @RequestBody com.example.stockgestion.Dto.request.OutboundRequestDto request) {
@@ -70,9 +53,7 @@ public class InventoryController {
         return ResponseEntity.status(201).body(dto);
     }
 
-    /**
-     * GET /inventory - list all inventories
-     */
+
     @GetMapping
     public ResponseEntity<List<InventoryResponseDto>> getAll() {
         List<InventoryResponseDto> list = inventoryService.getAllInventories();

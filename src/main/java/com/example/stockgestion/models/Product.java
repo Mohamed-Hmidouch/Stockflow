@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,6 +42,9 @@ public class Product {
     @NotNull
     @Column(name = "active",nullable = false)
     private Boolean active;
+
+    @Column(name = "price", precision = 19, scale = 2)
+    private BigDecimal price;
 
     @OneToMany(mappedBy = "product")
     private List<Inventory> inventoriesProduct;

@@ -18,6 +18,7 @@ import com.example.stockgestion.Dto.request.WareHouseRequestDto;
 import com.example.stockgestion.Dto.response.WareHouseResponseDto;
 import com.example.stockgestion.services.WarehouseService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -34,7 +35,7 @@ public class WarehouseController {
     }
     
     @PostMapping("create")
-    public ResponseEntity<WareHouseResponseDto> createWarehouse(@RequestBody WareHouseRequestDto requestDto) {
+    public ResponseEntity<WareHouseResponseDto> createWarehouse(@RequestBody @Valid WareHouseRequestDto requestDto) {
         WareHouseResponseDto createdWarehouse = warehouseService.createWareHouse(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdWarehouse);
     }
