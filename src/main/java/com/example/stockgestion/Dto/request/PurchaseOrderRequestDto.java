@@ -22,7 +22,6 @@ public class PurchaseOrderRequestDto {
     @NotNull(message = "Le statut est requis (ex: DRAFT ou APPROVED)")
     private POStatus status;
     
-    // PAS de createdAt (le serveur le gère)
 
     @Valid // Dit à Spring de valider AUSSI les objets dans cette liste
     @NotNull(message = "La liste des lignes ne peut pas être nulle")

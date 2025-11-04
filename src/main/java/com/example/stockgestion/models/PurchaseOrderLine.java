@@ -43,4 +43,8 @@ public class PurchaseOrderLine {
     // (Note: J'ai ajouté unitPrice, présent sur votre diagramme UML)
     @Column(precision = 10, scale = 2) // Important pour l'argent
     private BigDecimal unitPrice;
+
+    @NotNull
+    @Column(name = "qtyReceived")
+    private long qtyReceived;
 }
