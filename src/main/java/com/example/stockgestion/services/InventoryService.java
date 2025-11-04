@@ -96,7 +96,7 @@ public class InventoryService {
 
         // find or initialize inventory
         Inventory inventory = inventoryRepository.findByProduct_IdAndWarehouse_Id(dto.getProductId(), dto.getWarehouseId())
-                .orElseGet(() -> {
+                .stream().findFirst().orElseGet(() -> {
                     Inventory i = new Inventory();
                     i.setProduct(product);
                     i.setWarehouse(warehouse);

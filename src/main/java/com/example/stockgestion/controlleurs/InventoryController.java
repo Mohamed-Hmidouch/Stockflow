@@ -40,20 +40,6 @@ public class InventoryController {
         return ResponseEntity.status(201).body(dto);
     }
 
-
-    @PostMapping("/outbound")
-    public ResponseEntity<Void> outbound(@Valid @RequestBody com.example.stockgestion.Dto.request.OutboundRequestDto request) {
-        inventoryService.outbound(request);
-        return ResponseEntity.status(201).build();
-    }
-
-    @PostMapping("/adjustments")
-    public ResponseEntity<com.example.stockgestion.Dto.response.InventoryMovementResponseDto> adjust(@Valid @RequestBody com.example.stockgestion.Dto.request.AdjustmentRequestDto request) {
-        var dto = inventoryService.adjust(request);
-        return ResponseEntity.status(201).body(dto);
-    }
-
-
     @GetMapping
     public ResponseEntity<List<InventoryResponseDto>> getAll() {
         List<InventoryResponseDto> list = inventoryService.getAllInventories();
@@ -78,24 +64,6 @@ public class InventoryController {
         return ResponseEntity.ok(list);
     }
 
-    /**
-     * GET /inventory/movements - list movements with optional filters
-     */
-    @GetMapping("/movements")
-    public ResponseEntity<org.springframework.data.domain.Page<com.example.stockgestion.Dto.response.InventoryMovementResponseDto>> listMovements(
-            @RequestParam(required = false) UUID productId,
-            @RequestParam(required = false) UUID warehouseId,
-            @RequestParam(required = false) com.example.stockgestion.models.enums.MovementType type,
-            @RequestParam(required = false) java.time.Instant from,
-            @RequestParam(required = false) java.time.Instant to,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
-        var result = inventoryService.listMovements(productId, warehouseId, type, from, to, pageable);
-        return ResponseEntity.ok(result);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<InventoryResponseDto> getById(@PathVariable UUID id) {
         InventoryResponseDto dto = inventoryService.getInventoryById(id);
@@ -106,11 +74,5 @@ public class InventoryController {
     public ResponseEntity<InventoryResponseDto> update(@PathVariable UUID id, @Valid @RequestBody InventoryRequestDto request) {
         InventoryResponseDto dto = inventoryService.updateInventory(id, request);
         return ResponseEntity.ok(dto);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        inventoryService.deleteInventory(id);
-        return ResponseEntity.noContent().build();
     }
 }
