@@ -111,4 +111,11 @@ public class PurchaseOrderService {
         PurchaseOrder orderSaved = purchaseOrderRepository.save(purchaseOrder);
         return modelMapper.map(orderSaved, PurchaseOrderResponseDto.class);
     }
+
+    public List<PurchaseOrderResponseDto> getAllPurchaseOrders() {
+        List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAll();
+        return purchaseOrders.stream()
+                .map(order -> modelMapper.map(order, PurchaseOrderResponseDto.class))
+                .toList();
+    }
 }
