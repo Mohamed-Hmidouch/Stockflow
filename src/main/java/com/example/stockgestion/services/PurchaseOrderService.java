@@ -118,4 +118,10 @@ public class PurchaseOrderService {
                 .map(order -> modelMapper.map(order, PurchaseOrderResponseDto.class))
                 .toList();
     }
+
+    public PurchaseOrderResponseDto getPurchaseOrderById(UUID id) {
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Purchase Order not found"));
+        return modelMapper.map(purchaseOrder, PurchaseOrderResponseDto.class);
+    }
 }
