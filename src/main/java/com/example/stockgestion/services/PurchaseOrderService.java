@@ -87,7 +87,7 @@ public class PurchaseOrderService {
         });
         List<PurchaseOrderLine> poLineToUpdate = new ArrayList<>();
         requestDto.getReceivedLineDto().forEach(line -> {
-            UUID productId = UUID.fromString(line.getProductId().toString());
+            UUID productId = line.getProductId();
             PurchaseOrderLine poLine = purchaseOrder.getLines().stream()
                     .filter(l -> l.getProduct().getId().equals(productId)).findFirst()
                     .orElseThrow(() -> new ResourceNotFoundException("line not found"));
