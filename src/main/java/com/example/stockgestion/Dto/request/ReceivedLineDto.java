@@ -1,5 +1,7 @@
 package com.example.stockgestion.Dto.request;
 
+import java.util.UUID;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -14,10 +16,10 @@ import lombok.Setter;
 public class ReceivedLineDto {
 
     @NotNull(message = "L'ID du produit ne peut pas être nul")
-    private Long productId;
+    private UUID productId;
 
     @NotNull(message = "La ligne de commande d'achat ne peut pas être nulle")
-    private Long poLine;
+    private UUID poLine;
 
     @NotNull(message = "La quantité reçue ne peut pas être nulle")
     @Positive(message = "La quantité reçue doit être positive")
