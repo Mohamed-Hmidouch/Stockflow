@@ -3,6 +3,7 @@ package com.example.stockgestion.services;
 import com.example.stockgestion.Dto.request.PurchaseOrderRequestDto;
 import com.example.stockgestion.Dto.request.ReceiveRequestDto;
 import com.example.stockgestion.Dto.response.PurchaseOrderResponseDto;
+import com.example.stockgestion.events.StockReceivedEvent;
 import com.example.stockgestion.exception.ResourceNotFoundException;
 import com.example.stockgestion.models.*;
 import com.example.stockgestion.models.enums.MovementType;
@@ -11,6 +12,7 @@ import com.example.stockgestion.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -21,6 +23,7 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class PurchaseOrderService {
+    private final ApplicationEventPublisher eventPublisher;
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final PurchaseOrderLineRepository purchaseOrderLineRepository;
     private final InventoryRepository inventoryRepository;
@@ -84,6 +87,8 @@ public class PurchaseOrderService {
             inventoryMovement.setType(MovementType.INBOUND);
             inventoryMovement.setQuantity(qtyReceived);
             movmentsToCreate.add(inventoryMovement);
+            StockReceivedEvent event = new StockReceivedEvent(product.getId(),wareHouse.getId(),qtyReceived);
+            this.eventPublisher.publishEvent(event);
         });
         List<PurchaseOrderLine> poLineToUpdate = new ArrayList<>();
         requestDto.getReceivedLineDto().forEach(line -> {
