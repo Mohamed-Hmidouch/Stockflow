@@ -9,5 +9,6 @@ import java.util.UUID;
 public interface SalesOrderRepository extends JpaRepository<SalesOrder, UUID> {
 
     void findByClientId(UUID id);
-    List<SalesOrder> findByProductIdAndQtyBackorderedGreaterThanOrderByCreatedAt(UUID productId, long qtyBackordered);
+    // TODO: Fix this query - productId is not a direct property of SalesOrder
+    // List<SalesOrder> findByProductIdAndQtyBackorderedGreaterThanOrderByCreatedAt(UUID productId, long qtyBackordered);
 }
