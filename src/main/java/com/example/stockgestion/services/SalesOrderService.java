@@ -117,7 +117,22 @@ public class SalesOrderService {
                             .findByProduct_IdAndWarehouse_Id(line.getProduct().getId(), line.getWarehouse().getId());
                     if (!inventories.isEmpty()) {
                         Inventory inventory = inventories.get(0);
-                        inventory.setQtyReserved(inventory.getQtyReserved() - line.getQtyReserved());
+                        
+                        long currentReserved = inventory.getQtyReserved();
+                        long toRelease = line.getQtyReserved();
+                        
+                        if (currentReserved < toRelease) {
+                            System.err.println("WARNING: Tentative de libération de " + toRelease + 
+                                             " unités alors que seulement " + currentReserved + 
+                                             " sont réservées pour le produit " + line.getProduct().getSku() + 
+                                             " dans l'entrepôt " + line.getWarehouse().getCode());
+                            
+                            inventory.setQtyReserved(0);
+                            
+                        } else {
+                            inventory.setQtyReserved(currentReserved - toRelease);
+                        }
+                        
                         inventoriesToUpdate.add(inventory);
                     } else {
                         throw new ResourceNotFoundException("Inventory", "product/warehouse",
