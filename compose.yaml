@@ -1,7 +1,9 @@
 version: '3.9'
 
 services:
-  # PostgreSQL Database
+  # ======================================
+  # L-KHDMA L-9DIMA (الخدمة القديمة)
+  # ======================================
   postgres:
     image: postgres:16-alpine
     container_name: stockgestion-postgres
@@ -10,7 +12,7 @@ services:
       POSTGRES_USER: stockuser
       POSTGRES_PASSWORD: stockpass
     ports:
-      - "5433:5432"  # 5433 sur l'hôte pour éviter conflit local
+      - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
@@ -21,7 +23,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # pgAdmin pour gérer la DB
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: stockgestion-pgadmin
@@ -38,7 +39,6 @@ services:
     depends_on:
       - postgres
 
-  # Spring Boot Application (.jar)
   stockgestion-app:
     build:
       context: .
@@ -59,9 +59,52 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # ======================================
+  # L-KHDMA L-JDIDA (الخدمة الجديدة) (Jenkins + SonarQube)
+  # ======================================
+
+  # 1. Jenkins (L-Robot l-Kbir)
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17 # Khas JDK 17 bach y-matchi l-projet dyalk
+    container_name: stockgestion-jenkins
+    ports:
+      - "8081:8080" # 8081 bach ma y-tḍarbch m3a Spring Boot
+      - "50000:50000"
+    networks:
+      - stockgestion-network
+    user: root # Khasna root bach y9der ykhdem b Docker socket
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      # Hada howa l-blan l-mohim:
+      # Kan-partagiw (نشارك) Docker dyal l-Host m3a l-Container
+      # Bach Jenkins y9der y-bni Docker images (kifma ṭleb l-brief)
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # 2. SonarQube (L-Robot dyl L-Qualité)
+  sonarqube:
+    image: sonarqube:lts-community # LTS = Long Term Support
+    container_name: stockgestion-sonarqube
+    ports:
+      - "9000:9000"
+    networks:
+      - stockgestion-network
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+
+# ======================================
+# L-Volumes w L-Networks (L-Blanat l-Mochtarakin)
+# ======================================
 volumes:
   postgres-data:
   pgadmin-data:
+  jenkins-data: # <-- ZEDNAH (أضفناه)
+  sonarqube-data: # <-- ZEDNAH (أضفناه)
+  sonarqube-extensions: # <-- ZEDNAH (أضفناه)
+  sonarqube-logs: # <-- ZEDNAH (أضفناه)
 
 networks:
   stockgestion-network:
