@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface SalesOrderLineRepository extends JpaRepository<SalesOrderLine, UUID> {
     List<SalesOrderLine> findByProductIdAndQtyBackorderedGreaterThanOrderByCreatedAtAsc(UUID productId, long qtyBackordered);
+    List<SalesOrderLine> findByProductId(UUID productId);
 }

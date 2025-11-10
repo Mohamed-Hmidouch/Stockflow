@@ -5,7 +5,10 @@ import com.example.stockgestion.Dto.response.ProductResponseDto;
 import com.example.stockgestion.exception.ConflictException;
 import com.example.stockgestion.exception.ResourceNotFoundException;
 import com.example.stockgestion.models.Product;
+import com.example.stockgestion.models.SalesOrder;
+import com.example.stockgestion.models.SalesOrderLine;
 import com.example.stockgestion.repositories.ProductRepository;
+import com.example.stockgestion.repositories.SalesOrderLineRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
-
+    private final SalesOrderLineRepository salesOrderLineRepository;
     @Transactional
     public ProductResponseDto createProduct(ProductRequestDto productRequestDto) {
         if (productRepository.existsBySku(productRequestDto.getSku())) {
@@ -70,5 +73,39 @@ public class ProductService {
     Product existingProduct = productRepository.findById(id).orElseThrow(() ->
         new ResourceNotFoundException("Produit", "id", id));
         productRepository.delete(existingProduct);
+    }
+
+
+    @Transactional
+    public ProductResponseDto deactivateProduct(String sku) {
+        Product product = productRepository.findBySku(sku);
+        if(product == null)
+            throw new ResourceNotFoundException("Produit avec ce Sku est pas trouvé","Sku",sku);
+
+        int activeOrderCount = productRepository.countActiveOrdersBySku(sku);
+
+        if (activeOrderCount > 0) {
+            throw new ConflictException(
+                    "Le produit avec le SKU '" + sku + "' ne peut pas être désactivé car il est associé à des commandes en cours.");
+        }
+
+        if (salesOrderLineRepository.findByProductId(product.getId()).isEmpty()) {
+            throw new ResourceNotFoundException("SalesOrder", "id", product.getId());
+        }
+        for(SalesOrderLine orderLine : salesOrderLineRepository.findByProductId(product.getId())) {
+            SalesOrder order = orderLine.getSalesOrder();
+            if (order != null && ("DRAFT".equals(order.getStatus()) || "CONFIRMED".equals(order.getStatus()))) {
+                throw new ConflictException(
+                        "Le produit avec le SKU '" + sku + "' ne peut pas être désactivé car il est associé à des commandes en statut DRAFT ou CONFIRMED.");
+            }
+            long totalReservedStock = orderLine.getQtyReserved();
+            if (totalReservedStock > 0) {
+                throw new ConflictException("Le produit avec le SKU '" + sku + "' ne peut pas être désactivé");
+            }
+        }
+
+        product.setActive(false);
+        Product savedProduct = productRepository.save(product);
+        return new ProductResponseDto(savedProduct);
     }
 }

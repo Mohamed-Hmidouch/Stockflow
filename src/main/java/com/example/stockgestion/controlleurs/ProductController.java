@@ -118,4 +118,12 @@ public class ProductController {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{sku}/deactivate")
+    public ResponseEntity<Void> deactivateProduct(
+            @Parameter(description = "SKU du produit à désactiver", required = true, example = "PROD-001")
+            @PathVariable String sku) {
+        productService.deactivateProduct(sku);
+        return ResponseEntity.noContent().build();
+    }
 }
