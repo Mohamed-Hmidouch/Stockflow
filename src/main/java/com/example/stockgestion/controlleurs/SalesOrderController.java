@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,6 +28,12 @@ import java.util.UUID;
 public class SalesOrderController {
 
     private final SalesOrderService salesOrderService;
+
+    @GetMapping
+    public ResponseEntity<List<SalesOrderResponseDto>> getAllSalesOrders() {
+        List<SalesOrderResponseDto> orders = salesOrderService.getAllSalesOrders();
+        return ResponseEntity.ok(orders);
+    }
 
     @Operation(
         summary = "Créer une nouvelle commande client", 

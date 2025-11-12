@@ -81,14 +81,11 @@ public class ProductService {
         Product product = productRepository.findBySku(sku);
         if(product == null)
             throw new ResourceNotFoundException("Produit avec ce Sku est pas trouvé","Sku",sku);
-
         int activeOrderCount = productRepository.countActiveOrdersBySku(sku);
-
         if (activeOrderCount > 0) {
             throw new ConflictException(
                     "Le produit avec le SKU '" + sku + "' ne peut pas être désactivé car il est associé à des commandes en cours.");
         }
-
         if (salesOrderLineRepository.findByProductId(product.getId()).isEmpty()) {
             throw new ResourceNotFoundException("SalesOrder", "id", product.getId());
         }
@@ -103,7 +100,6 @@ public class ProductService {
                 throw new ConflictException("Le produit avec le SKU '" + sku + "' ne peut pas être désactivé");
             }
         }
-
         product.setActive(false);
         Product savedProduct = productRepository.save(product);
         return new ProductResponseDto(savedProduct);
