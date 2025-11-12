@@ -31,6 +31,8 @@ public class SalesOrderResponseDto {
         this.createdAt = order.getCreatedAt();
         this.totalPrice = order.getTotalPrice();
         this.lines = order.getLines().stream().map(SalesOrderLineResponseDto::new).toList();
-        this.shipments = order.getShipments().stream().map(ShipmentResponseDto::new).toList();
+        // Temporairement commenté pour éviter les problèmes de mapping circulaire
+        // this.shipments = order.getShipments().stream().map(ShipmentResponseDto::new).toList();
+        this.shipments = List.of(); // Liste vide pour l'instant
     }
 }

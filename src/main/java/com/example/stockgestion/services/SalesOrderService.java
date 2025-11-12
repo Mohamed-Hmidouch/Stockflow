@@ -16,13 +16,9 @@ import com.example.stockgestion.services.helpers.*;
 
 import lombok.AllArgsConstructor;
 
-import org.apache.tomcat.util.net.SocketEvent;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import java.lang.reflect.Type;
 
 import org.springframework.context.event.EventListener;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,11 +90,11 @@ public class SalesOrderService {
     }
 
     @Transactional(readOnly = true)
-    List<SalesOrderResponseDto> getAllSalesOrders() {
+    public List<SalesOrderResponseDto> getAllSalesOrders() {
         List<SalesOrder> orders = salesOrderRepository.findAll();
-        Type listType = new TypeToken<List<SalesOrderResponseDto>>() {
-        }.getType();
-        return modelMapper.map(orders, listType);
+        return orders.stream()
+                .map(order -> new SalesOrderResponseDto(order))
+                .toList();
     }
 
     @Transactional
