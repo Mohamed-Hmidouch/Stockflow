@@ -204,9 +204,9 @@ pipeline {
         stage('🧪 Test Docker Image') {
             when {
                 anyOf {
-                    branch 'main'
-                    branch 'master'
-                    branch 'develop'
+                    branch '*/main'
+                    branch '*/master'
+                    branch '*/develop'
                     branch pattern: "SS-.*", comparator: "REGEXP"
                 }
             }
@@ -229,8 +229,8 @@ pipeline {
         stage('📤 Push Docker Image') {
             when {
                 anyOf {
-                    branch 'main'
-                    branch 'master'
+                    branch '*/main'
+                    branch '*/master'
                 }
             }
             steps {
@@ -281,8 +281,8 @@ pipeline {
         stage('🚀 Deploy to Production') {
             when {
                 anyOf {
-                    branch 'main'
-                    branch 'master'
+                    branch '*/main'
+                    branch '*/master'
                 }
             }
             steps {

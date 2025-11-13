@@ -73,9 +73,6 @@ services:
     user: root # Khasna root bach y9der ykhdem b Docker socket
     volumes:
       - jenkins-data:/var/jenkins_home
-      # Hada howa l-blan l-mohim:
-      # Kan-partagiw (نشارك) Docker dyal l-Host m3a l-Container
-      # Bach Jenkins y9der y-bni Docker images (kifma ṭleb l-brief)
       - /var/run/docker.sock:/var/run/docker.sock
 
   # 2. SonarQube (L-Robot dyl L-Qualité)
