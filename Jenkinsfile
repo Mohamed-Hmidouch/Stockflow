@@ -179,9 +179,9 @@ pipeline {
         stage('🐳 Build Docker Image') {
             when {
                 anyOf {
-                    branch 'main'
-                    branch 'master'
-                    branch 'develop'
+                    branch '*/main'
+                    branch '*/master'
+                    branch '*/develop'
                     branch pattern: "SS-.*", comparator: "REGEXP"
                 }
             }
