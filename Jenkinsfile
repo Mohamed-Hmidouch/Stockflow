@@ -178,11 +178,14 @@ pipeline {
         
         stage('🐳 Build Docker Image') {
             when {
-                anyOf {
-                    branch '*/main'
-                    branch '*/master'
-                    branch '*/develop'
-                    branch pattern: "SS-.*", comparator: "REGEXP"
+                expression {
+                    return env.GIT_BRANCH == 'main' || 
+                           env.GIT_BRANCH == 'master' || 
+                           env.GIT_BRANCH == 'develop' ||
+                           env.GIT_BRANCH ==~ /.*\/main/ ||
+                           env.GIT_BRANCH ==~ /.*\/master/ ||
+                           env.GIT_BRANCH ==~ /.*\/develop/ ||
+                           env.GIT_BRANCH ==~ /SS-.*/
                 }
             }
             steps {
@@ -203,11 +206,14 @@ pipeline {
         
         stage('🧪 Test Docker Image') {
             when {
-                anyOf {
-                    branch '*/main'
-                    branch '*/master'
-                    branch '*/develop'
-                    branch pattern: "SS-.*", comparator: "REGEXP"
+                expression {
+                    return env.GIT_BRANCH == 'main' || 
+                           env.GIT_BRANCH == 'master' || 
+                           env.GIT_BRANCH == 'develop' ||
+                           env.GIT_BRANCH ==~ /.*\/main/ ||
+                           env.GIT_BRANCH ==~ /.*\/master/ ||
+                           env.GIT_BRANCH ==~ /.*\/develop/ ||
+                           env.GIT_BRANCH ==~ /SS-.*/
                 }
             }
             steps {
@@ -228,9 +234,11 @@ pipeline {
         
         stage('📤 Push Docker Image') {
             when {
-                anyOf {
-                    branch '*/main'
-                    branch '*/master'
+                expression {
+                    return env.GIT_BRANCH == 'main' || 
+                           env.GIT_BRANCH == 'master' ||
+                           env.GIT_BRANCH ==~ /.*\/main/ ||
+                           env.GIT_BRANCH ==~ /.*\/master/
                 }
             }
             steps {
@@ -253,7 +261,10 @@ pipeline {
         
         stage('🚀 Deploy to Development') {
             when {
-                branch 'develop'
+                expression {
+                    return env.GIT_BRANCH == 'develop' ||
+                           env.GIT_BRANCH ==~ /.*\/develop/
+                }
             }
             steps {
                 echo '🚀 Déploiement en environnement de développement...'
@@ -280,9 +291,11 @@ pipeline {
         
         stage('🚀 Deploy to Production') {
             when {
-                anyOf {
-                    branch '*/main'
-                    branch '*/master'
+                expression {
+                    return env.GIT_BRANCH == 'main' || 
+                           env.GIT_BRANCH == 'master' ||
+                           env.GIT_BRANCH ==~ /.*\/main/ ||
+                           env.GIT_BRANCH ==~ /.*\/master/
                 }
             }
             steps {
