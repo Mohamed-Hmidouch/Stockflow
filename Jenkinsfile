@@ -8,7 +8,7 @@ pipeline {
         MAVEN_OPTS = '-Xmx1024m -Xms512m'
         
         // Configuration Docker
-        DOCKER_IMAGE = "stockgestion-app"
+        DOCKER_IMAGE = "mohamedhmidouch/stockgestion-app"
         DOCKER_TAG = "${env.BUILD_NUMBER}"
         DOCKER_REGISTRY = "" // Ajouter votre registry si nécessaire (ex: docker.io/username)
         
@@ -234,28 +234,22 @@ pipeline {
         
         stage('📤 Push Docker Image') {
             when {
-                expression {
-                    return env.GIT_BRANCH == 'main' || 
-                           env.GIT_BRANCH == 'master' ||
-                           env.GIT_BRANCH ==~ /.*\/main/ ||
-                           env.GIT_BRANCH ==~ /.*\/master/
-                }
+            anyOf {
+                expression { return env.BRANCH_NAME == 'main' }
+                expression { return env.BRANCH_NAME == 'origin/main' }
+                expression { return env.BRANCH_NAME == 'master' }
+            }
             }
             steps {
-                echo '📤 Publication de l\'image Docker...'
-                script {
-                    // Si vous utilisez un registry privé, décommenter et configurer
-                    // docker.withRegistry("https://${DOCKER_REGISTRY}", 'docker-credentials') {
-                    //     sh """
-                    //         docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}
-                    //         docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest
-                    //     """
-                    // }
-                    
-                    echo "ℹ️ Push Docker désactivé. Configurez votre registry dans les credentials Jenkins."
-                    echo "✅ Images disponibles localement:"
-                    sh "docker images ${DOCKER_IMAGE}"
-                }
+            echo '📤 Connexion et Publication sur Docker Hub...'
+            withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                sh '''
+                echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+                docker push ${DOCKER_IMAGE}:latest
+                docker logout
+                '''
+            }
             }
         }
         
