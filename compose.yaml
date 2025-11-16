@@ -95,17 +95,14 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    env_file:
-      - stockgestion.env  # Charger les secrets depuis le fichier
     environment:
-      # On dit à Spring (dans le conteneur) où trouver la BDD
-      # Les valeurs ${...} viennent du fichier stockgestion.env
-      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST_PROD:-postgres}:${DB_PORT_PROD:-5432}/${DB_NAME_PROD:-stockgestiondb}
-      SPRING_DATASOURCE_USERNAME: ${DB_USER_PROD:-stockuser}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD_PROD}
+      # Utiliser les variables d'environnement du Jenkinsfile
+      SPRING_DATASOURCE_URL: ${DB_URL:-jdbc:postgresql://postgres:5432/stockgestiondb}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-stockuser}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-stockpass}
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-prod}
+      SPRING_PROFILES_ACTIVE: prod
     restart: unless-stopped
 
 # ======================================
