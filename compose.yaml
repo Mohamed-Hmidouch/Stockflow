@@ -54,6 +54,14 @@ services:
     volumes:
       - jenkins-data:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+    # =======================================================
+    # AJOUT : Serveurs DNS pour résoudre github.com
+    # =======================================================
+    dns:
+      - 8.8.8.8      # Google DNS
+      - 8.8.4.4      # Google DNS secondaire
+      - 1.1.1.1      # Cloudflare DNS
+    # =======================================================
 
   # 2. SonarQube (L-Robot dyl L-Qualité)
   sonarqube:
