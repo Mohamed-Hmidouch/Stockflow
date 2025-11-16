@@ -59,6 +59,23 @@ pipeline {
             }
         }
         
+        stage('🔧 Install Docker CLI') {
+            steps {
+                echo '🔧 Installation du client Docker et Docker Compose...'
+                sh '''
+                    apt-get update
+                    apt-get install -y lsb-release curl gpg
+                    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+                    echo \
+                      "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
+                      $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+                    apt-get update
+                    apt-get install -y docker-ce-cli
+                    echo "✅ Docker CLI et Compose v2 installés."
+                '''
+            }
+        }
+        
         stage('🧹 Clean') {
             steps {
                 echo '🧹 Nettoyage de l\'environnement...'
@@ -268,8 +285,8 @@ pipeline {
                         docker stop stockgestion-app || true
                         docker rm stockgestion-app || true
                         
-                        # Déployer la nouvelle version avec docker-compose
-                        docker-compose up -d stockgestion-app
+                        # Déployer la nouvelle version avec docker compose V2
+                        docker compose up -d stockgestion-app
                         
                         # Attendre que l'application soit prête
                         sleep 10
@@ -299,13 +316,13 @@ pipeline {
                     sh '''
                         echo "🚀 Déploiement de la version ${DOCKER_TAG} en production..."
                         
-                        # Utiliser docker-compose pour le déploiement
-                        docker-compose down stockgestion-app
-                        docker-compose up -d stockgestion-app
+                        # Utiliser docker compose V2 (sans tiret)
+                        docker compose down stockgestion-app || true
+                        docker compose up -d stockgestion-app
                         
-                        # Health check
+                        # Health check - Appeler l'app par son nom de service Docker
                         sleep 15
-                        curl -f http://localhost:8080/actuator/health || echo "⚠️ Health check échoué"
+                        curl -f http://stockgestion-app:8080/actuator/health || echo "⚠️ Health check échoué"
                         
                         echo "✅ Déploiement en production terminé"
                     '''

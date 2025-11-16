@@ -37,26 +37,6 @@ services:
     depends_on:
       - postgres
 
-  stockgestion-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: stockgestion-app
-    ports:
-      - "8080:8080"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/stockgestiondb
-      SPRING_DATASOURCE_USERNAME: stockuser
-      SPRING_DATASOURCE_PASSWORD: stockpass
-    volumes:
-      - ./target/stockgestion-0.0.1-SNAPSHOT.jar:/app.jar
-    networks:
-      - stockgestion-network
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-
   # ======================================
   # L-KHDMA L-JDIDA (الخدمة الجديدة) (Jenkins + SonarQube)
   # ======================================
@@ -89,6 +69,36 @@ services:
       - sonarqube-data:/opt/sonarqube/data
       - sonarqube-extensions:/opt/sonarqube/extensions
       - sonarqube-logs:/opt/sonarqube/logs
+
+  # ======================================
+  # 3. Application Spring Boot (StockGestion)
+  # ======================================
+  stockgestion-app:
+    # L'image qu'on va "push" sur Docker Hub
+    image: mohamedhmidouch/stockgestion-app:latest
+    container_name: stockgestion-app-prod
+    networks:
+      - stockgestion-network
+    ports:
+      # L'app tourne sur 8080 (interne)
+      # On l'expose sur 8080 (externe)
+      # (Jenkins est sur 8081, donc il n'y a pas de conflit)
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - stockgestion.env  # Charger les secrets depuis le fichier
+    environment:
+      # On dit à Spring (dans le conteneur) où trouver la BDD
+      # Les valeurs ${...} viennent du fichier stockgestion.env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST_PROD:-postgres}:${DB_PORT_PROD:-5432}/${DB_NAME_PROD:-stockgestiondb}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER_PROD:-stockuser}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD_PROD}
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-prod}
+    restart: unless-stopped
 
 # ======================================
 # L-Volumes w L-Networks (L-Blanat l-Mochtarakin)
