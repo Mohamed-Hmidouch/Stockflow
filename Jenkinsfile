@@ -36,7 +36,7 @@ pipeline {
         // Garder les 10 derniers builds
         buildDiscarder(logRotator(numToKeepStr: '10'))
         // Timeout global
-        timeout(time: 30, unit: 'MINUTES')
+        timeout(time: 60, unit: 'MINUTES')
         // Désactiver le checkout automatique
         skipDefaultCheckout(false)
         // Timestamper pour les logs
