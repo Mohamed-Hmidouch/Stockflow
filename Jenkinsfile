@@ -66,26 +66,32 @@ pipeline {
                     apt-get update
                     
                     # =======================================================
-                    # LA CORRECTION : On supprime les packages en conflit
+                    # 1. Nettoyer les anciens packages Docker
                     # =======================================================
                     echo "Suppression des anciens packages Docker pour éviter les conflits..."
                     apt-get remove -y docker-cli docker.io docker-buildx || true
                     # =======================================================
 
+                    # =======================================================
+                    # 2. Installer Docker CLI (qui inclut 'docker compose v2')
+                    # =======================================================
                     apt-get install -y lsb-release curl gpg
-                    # =======================================================
-                    # LA CORRECTION : Ajouter --batch --yes à la commande gpg
-                    # =======================================================
                     curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor --batch --yes -o /usr/share/keyrings/docker-archive-keyring.gpg
                     echo \
                       "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
                       $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
                     
                     apt-get update
-                    
-                    # L'installation va maintenant réussir
                     apt-get install -y docker-ce-cli
-                    echo "✅ Docker CLI et Compose v2 installés."
+                    
+                    # =======================================================
+                    # 3. Installer docker-compose V1 (par sécurité)
+                    # =======================================================
+                    echo "Installation de docker-compose v1..."
+                    curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+                    chmod +x /usr/local/bin/docker-compose
+                    
+                    echo "✅ Docker CLI et Compose v1+v2 installés."
                 '''
             }
         }
@@ -265,22 +271,23 @@ pipeline {
         
         stage('📤 Push Docker Image') {
             when {
-            anyOf {
-                expression { return env.BRANCH_NAME == 'main' }
-                expression { return env.BRANCH_NAME == 'origin/main' }
-                expression { return env.BRANCH_NAME == 'master' }
-            }
+                expression {
+                    return env.GIT_BRANCH == 'main' || 
+                           env.GIT_BRANCH == 'master' ||
+                           env.GIT_BRANCH ==~ /.*\/main/ ||
+                           env.GIT_BRANCH ==~ /.*\/master/
+                }
             }
             steps {
-            echo '📤 Connexion et Publication sur Docker Hub...'
-            withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                sh '''
-                echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
-                docker push ${DOCKER_IMAGE}:latest
-                docker logout
-                '''
-            }
+                echo '📤 Connexion et Publication sur Docker Hub...'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+                    docker push ${DOCKER_IMAGE}:latest
+                    docker logout
+                    '''
+                }
             }
         }
         
