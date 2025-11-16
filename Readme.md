@@ -234,8 +234,8 @@ Consultez la documentation complète : [JENKINS_SETUP.md](docs/JENKINS_SETUP.md)
 # 1. Démarrer Jenkins
 docker-compose up -d jenkins
 
-# 2. Récupérer le mot de passe initial
-docker exec stockgestion-jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+# 2. Récupérer le mot de passe initial        f
+docker exec stockgestion-jenkins cat /var/jenkins_ home/secrets/initialAdminPassword
 
 # 3. Accéder à Jenkins
 # http://localhost:8081
