@@ -257,6 +257,9 @@ docker exec stockgestion-jenkins cat /var/jenkins_ home/secrets/initialAdminPass
 9. 🐳 **Docker Build** - Construction image
 10. 🚀 **Deploy** - Déploiement
 
+
+
+xd
 Consultez : [PIPELINE.md](docs/PIPELINE.md)
 
 ---
