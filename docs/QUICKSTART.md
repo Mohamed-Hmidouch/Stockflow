@@ -403,3 +403,24 @@ docker-compose restart jenkins
 ---
 
 **Bon développement ! 🚀**
+
+# 1️⃣ ADMIN
+Username: admin
+Password: admin123
+String: "admin:admin123"
+Base64: YWRtaW46YWRtaW4xMjM=
+Header: Authorization: Basic YWRtaW46YWRtaW4xMjM=
+
+# 2️⃣ WAREHOUSE_MANAGER  
+Username: manager
+Password: manager123
+String: "manager:manager123"
+Base64: bWFuYWdlcjptYW5hZ2VyMTIz
+Header: Authorization: Basic bWFuYWdlcjptYW5hZ2VyMTIz
+
+# 3️⃣ CLIENT
+Username: client
+Password: client123
+String: "client:client123"
+Base64: Y2xpZW50OmNsaWVudDEyMw==
+Header: Authorization: Basic Y2xpZW50OmNsaWVudDEyMw==
