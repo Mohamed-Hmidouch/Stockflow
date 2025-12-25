@@ -1,96 +1,109 @@
 package com.example.stockgestion.config;
 
+import com.example.stockgestion.security.JwtAuthenticationFilter;
+import com.example.stockgestion.services.UserDetailsServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
+/**
+ * Security configuration with JWT authentication
+ */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    // (Les prochaines étapes ajouteront des Beans ici)
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final UserDetailsServiceImpl userDetailsService;
 
+    /**
+     * Password encoder bean
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Utilise l'algorithme BCrypt
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Authentication provider using database user details
+     */
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        // Hada l-bean #3: (L-Users li ṭleb l-brief)
-        
-        // ADMIN
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("admin123"))
-                .roles("ADMIN") 
-                .build();
-        
-        // WAREHOUSE_MANAGER
-        UserDetails warehouseManager = User.builder()
-                .username("manager")
-                .password(passwordEncoder.encode("manager123"))
-                .roles("WAREHOUSE_MANAGER")
-                .build();
-        
-        // CLIENT
-        UserDetails clientUser = User.builder()
-                .username("client")
-                .password(passwordEncoder.encode("client123"))
-                .roles("CLIENT")
-                .build();
-
-        // Crée le gestionnaire d'utilisateurs avec les 3 comptes
-        return new InMemoryUserDetailsManager(admin, warehouseManager, clientUser);
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(passwordEncoder());
+        authProvider.setUserDetailsService(userDetailsService);
+        return authProvider;
     }
 
+    /**
+     * Authentication manager bean
+     */
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    /**
+     * Security filter chain with JWT and role-based authorization
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-           
-            .csrf(csrf -> csrf.disable())
+                // Disable CSRF (stateless JWT authentication doesn't need it)
+                .csrf(AbstractHttpConfigurer::disable)
 
-          
-            .httpBasic(withDefaults())
+                // Configure stateless session management
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            
-            .authorizeHttpRequests(authz -> authz
-                
-                // Règle A: ADMIN (Produits, Entrepôts, Commandes Fournisseurs)
-                .requestMatchers("/api/products/**").hasRole("ADMIN")
-                .requestMatchers("/api/warehouses/**").hasRole("ADMIN")
-                .requestMatchers("/api/purchase-orders/**").hasRole("ADMIN")
-                // (Ajoutez ici /api/suppliers/** si vous l'avez)
-                
-                // Règle B: WAREHOUSE_MANAGER (Inventaire, Mouvements)
-                .requestMatchers("/api/inventory/**").hasRole("WAREHOUSE_MANAGER")
-                
-                // Règle C: CLIENT (Commandes Client)
-                .requestMatchers("/api/sales-orders/**").hasRole("CLIENT")
-                
-                // Règle D: Autoriser Swagger (pour les tests)
-                .requestMatchers(
-                    "/swagger-ui.html", 
-                    "/swagger-ui/**", 
-                    "/api-docs/**"
-                ).permitAll()
-                
-                // Règle E (Finale): Tout le reste doit être authentifié
-                .anyRequest().authenticated() 
-            );
+                // Configure authorization rules
+                .authorizeHttpRequests(authz -> authz
+                        // Public endpoints (no authentication required)
+                        .requestMatchers(
+                                "/api/auth/login",
+                                "/api/auth/refresh",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/api-docs/**",
+                                "/v3/api-docs/**")
+                        .permitAll()
+
+                        // Role-based authorization
+                        // ADMIN: Products, Warehouses, Purchase Orders, Suppliers
+                        .requestMatchers("/api/products/**").hasRole("ADMIN")
+                        .requestMatchers("/api/warehouses/**").hasRole("ADMIN")
+                        .requestMatchers("/api/purchase-orders/**").hasRole("ADMIN")
+                        .requestMatchers("/api/suppliers/**").hasRole("ADMIN")
+
+                        // WAREHOUSE_MANAGER: Inventory, Movements
+                        .requestMatchers("/api/inventory/**").hasRole("WAREHOUSE_MANAGER")
+
+                        // CLIENT: Sales Orders (with data isolation enforced in service layer)
+                        .requestMatchers("/api/sales-orders/**").hasRole("CLIENT")
+
+                        // All other requests require authentication
+                        .anyRequest().authenticated())
+
+                // Set authentication provider
+                .authenticationProvider(authenticationProvider())
+
+                // Add JWT filter before UsernamePasswordAuthenticationFilter
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
 }

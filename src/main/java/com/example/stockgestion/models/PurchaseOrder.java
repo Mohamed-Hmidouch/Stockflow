@@ -40,6 +40,11 @@ public class PurchaseOrder {
     @Column(nullable = false)
     private Instant createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = Instant.now();
+    }
+
     // ----- RELATION VERS LES LIGNES DE COMMANDE -----
     @OneToMany(
             mappedBy = "purchaseOrder", // "purchaseOrder" = champ dans PurchaseOrderLine

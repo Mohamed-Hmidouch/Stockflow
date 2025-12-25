@@ -19,8 +19,11 @@ public class ShipmentResponseDto {
     private CarrierResponseDto carrier;
     private ShipmentStatus status;
     private String trackingNumber;
+    private Instant plannedDepartureDate;
+    private Instant actualDepartureDate;
     private Instant shippedAt;
     private Instant deliveredAt;
+    private Integer cutoffHour;
 
     public ShipmentResponseDto(Shipment shipment) {
         this.id = shipment.getId();
@@ -28,7 +31,10 @@ public class ShipmentResponseDto {
         this.carrier = new CarrierResponseDto(shipment.getCarrier());
         this.status = shipment.getStatus();
         this.trackingNumber = shipment.getTrackingNumber();
+        this.plannedDepartureDate = shipment.getPlannedDepartureDate();
+        this.actualDepartureDate = shipment.getActualDepartureDate();
         this.shippedAt = shipment.getShippedAt();
         this.deliveredAt = shipment.getDeliveredAt();
+        this.cutoffHour = shipment.getCutoffHour();
     }
 }

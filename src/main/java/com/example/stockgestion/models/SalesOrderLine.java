@@ -64,4 +64,9 @@ public class SalesOrderLine {
 
     @Column(nullable = false)
     private Instant createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = Instant.now();
+    }
 }

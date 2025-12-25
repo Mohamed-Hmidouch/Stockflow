@@ -43,6 +43,11 @@ public class SalesOrder {
     @Column(nullable = false)
     private Instant createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = Instant.now();
+    }
+
     @Column(precision = 19, scale = 2)
     private BigDecimal totalPrice;
 

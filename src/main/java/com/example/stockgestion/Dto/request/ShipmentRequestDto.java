@@ -14,13 +14,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShipmentRequestDto {
-    @NotNull
+    @NotNull(message = "L'ID de la commande est obligatoire")
     private UUID salesOrderId;
-    @NotNull
+    
+    @NotNull(message = "L'ID du transporteur est obligatoire")
     private UUID carrierId;
-    @NotNull
-    private ShipmentStatus status;
+    
     private String trackingNumber;
-    private Instant shippedAt;
-    private Instant deliveredAt;
+    
+    private Integer cutoffHour; // Heure limite (par défaut 14h si non fourni)
 }

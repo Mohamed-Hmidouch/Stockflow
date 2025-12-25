@@ -45,6 +45,11 @@ public class Shipment {
     @Column(unique = true) // Le numéro de suivi doit être unique
     private String trackingNumber;
 
-    private Instant shippedAt; // Date de départ
+    private Instant plannedDepartureDate; // Date de départ planifiée
+    private Instant actualDepartureDate;  // Date de départ réelle
+    private Instant shippedAt; // Date de départ (legacy, même que actualDepartureDate)
     private Instant deliveredAt; // Date de livraison
+    
+    @Column(name = "cutoff_hour")
+    private Integer cutoffHour = 14; // Heure limite (14h par défaut)
 }
