@@ -79,7 +79,66 @@ services:
       - sonarqube-logs:/opt/sonarqube/logs
 
   # ======================================
-  # 3. Application Spring Boot (StockGestion)
+  # 3. ELK Stack (Elasticsearch, Logstash, Kibana)
+  # ======================================
+  
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: elasticsearch
+    environment:
+      - node.name=es01
+      - cluster.name=elk-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - stockgestion-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.0
+    container_name: logstash
+    environment:
+      - LS_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5044:5044"
+    networks:
+      - stockgestion-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    networks:
+      - stockgestion-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  # ======================================
+  # 4. Application Spring Boot (StockGestion)
   # ======================================
   stockgestion-app:
     # L'image qu'on va "push" sur Docker Hub
@@ -115,6 +174,7 @@ volumes:
   sonarqube-data: # <-- ZEDNAH (أضفناه)
   sonarqube-extensions: # <-- ZEDNAH (أضفناه)
   sonarqube-logs: # <-- ZEDNAH (أضفناه)
+  es_data: # <-- ZEDNAH pour Elasticsearch
 
 networks:
   stockgestion-network:
